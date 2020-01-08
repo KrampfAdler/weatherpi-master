@@ -9,17 +9,18 @@
 <script th:inline="javascript">
   /*<![CDATA[*/
   window.onload = function() {
-    var temps = [[${tempPointsList}]];
-    var humidities = [[${humidityPointsList}]];
+    var highs = [[${highDataPointsList}]];
+    var lows = [[${lowDataPointsList}]];
 
     //  Only a test
-    temps.forEach(listFunction);
+    highs.forEach(listFunction);
     function listFunction(value, index, array) {
       console.log(value);
     }
 
 
-    temps.map(convertMillsToDate);
+    highs.map(convertMillsToDate);
+    lows.map(convertMillsToDate);
 
     function convertMillsToDate(item) {
       item.x = new Date(item.x);
@@ -30,50 +31,32 @@
       theme: "light2",
       exportEnabled: true,
       title:{
-        text: "Ambient Temperature (Today)"
-      },
-      toolTip: {
-        shared: true
+        text: "Ambient Temperature (Month)"
       },
       axisX:{
         title: "time",
-        intervalType: "hour",
-        valueFormatString: "HH:mm"
+        intervalType: "day",
+        valueFormatString: "dd.MM.yyyy"
       },
       axisY:{
         suffix: " °C",
-        title: "Temperature",
         includeZero: false,
-        valueFormatString: "#,##0",
         lineColor: "#f54242",
         titleFontColor: "#f54242",
         labelFontColor: "#f54242"
       },
-      axisY2:{
-        suffix: " %",
-        title: "Humidity",
-        includeZero: true,
-        lineColor: "#4245f5",
-        titleFontColor: "#4245f5",
-        labelFontColor: "#4245f5"
-      },
       data: [{
-        type: "column",
-        name: "Humidity",
-        axisYType: "secondary",
-        axisYIndex: 1,
+        type: "spline",
         xValueType: "dateTime",
-        xValueFormatString: "HH:mm",
-        yValueFormatString: "#0,#0 %",
+        xValueFormatString: "dd.MM.yyyy",
+        yValueFormatString: "#,##0 °C",
         lineColor:"#4245f5",
         color:"#4245f5",
         dataPoints: []
       },{
-        type: "line",
-        name: "Temperature",
+        type: "spline",
         xValueType: "dateTime",
-        xValueFormatString: "HH:mm",
-        yValueType: "number",
+        xValueFormatString: "dd.MM.yyyy",
         yValueFormatString: "#,##0 °C",
         lineColor:"#f54242",
         color:"#f54242",
@@ -82,8 +65,8 @@
     });
 
     /* Update dataPoints from AJAX and render the chart*/
-    chart.options.data[1].dataPoints = temps;
-    chart.options.data[0].dataPoints = humidities;
+    chart.options.data[1].dataPoints = highs;
+    chart.options.data[0].dataPoints = lows;
     chart.render();
 
   }
