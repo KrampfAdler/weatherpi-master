@@ -1,0 +1,16 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <title>Weather</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+</head>
+<body>
+<h1>Weather</h1>
+ambientTemperature: <b th:text="${weather.ambientTemperature}" /> °C<br>
+humidity: <b th:text="${weather.humidity}" /> %<br>
+windSpeed: <b th:text="${weather.windSpeed}" /> m/s<br>
+windGustSpeed: <b th:text="${weather.windGustSpeed}" /> m/s<br>
+rainfall: <b th:text="${weather.rainfall}" /><br>
+time: <b th:text="${weather.timeStamp}" /><br>
+</body>
+</html>

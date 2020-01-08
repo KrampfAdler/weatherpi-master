@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>Temps Today</title>
+</head>
+<body>
+
+<script th:inline="javascript">
+  /*<![CDATA[*/
+  window.onload = function() {
+    var temps = [[${tempPointsList}]];
+    var humidities = [[${humidityPointsList}]];
+
+    //  Only a test
+    temps.forEach(listFunction);
+    function listFunction(value, index, array) {
+      console.log(value);
+    }
+
+
+    temps.map(convertMillsToDate);
+
+    function convertMillsToDate(item) {
+      item.x = new Date(item.x);
+    }
+
+    var chart = new CanvasJS.Chart("chartContainer", {
+      animationEnabled: false,
+      theme: "light2",
+      exportEnabled: true,
+      title:{
+        text: "Ambient Temperature (Today)"
+      },
+      axisX:{
+        title: "time",
+        intervalType: "hour",
+        valueFormatString: "HH:mm"
+      },
+      axisY:{
+        suffix: " °C",
+        includeZero: false,
+        lineColor: "#f54242",
+        titleFontColor: "#f54242",
+        labelFontColor: "#f54242"
+      },
+      axisY2:{
+        suffix: " %",
+        includeZero: true,
+        lineColor: "#4245f5",
+        titleFontColor: "#4245f5",
+        labelFontColor: "#4245f5"
+      },
+      data: [{
+        type: "column",
+        axisYType: "secondary",
+        axisYIndex: 1,
+        xValueType: "dateTime",
+        xValueFormatString: "HH:mm",
+        yValueFormatString: "##%",
+        lineColor:"#4245f5",
+        color:"#4245f5",
+        dataPoints: []
+      },{
+        type: "spline",
+        xValueType: "dateTime",
+        xValueFormatString: "HH:mm",
+        yValueFormatString: "#,##0 °C",
+        lineColor:"#f54242",
+        color:"#f54242",
+        dataPoints: []
+      }]
+    });
+
+    /* Update dataPoints from AJAX and render the chart*/
+    chart.options.data[1].dataPoints = temps;
+    chart.options.data[0].dataPoints = humidities;
+    chart.render();
+
+  }
+  /*]]>*/
+</script>
+<div id="chartContainer" style="height: 370px; width: 100%;"></div>
+<script src="https://canvasjs.com/assets/script/canvasjs.min.js"></script>
+</body>
+</html>
