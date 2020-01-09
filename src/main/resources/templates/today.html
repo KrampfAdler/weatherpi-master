@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>Weather Today</title>
+  <link rel="stylesheet" type="text/css" href="/css/today.css"/>
+</head>
+<body>
+
+<script th:inline="javascript">
+  /*<![CDATA[*/
+  window.onload = function () {
+    var temps = [[${tempPointsList}]];
+    var humidities = [[${humidityPointsList}]];
+    var windspeeds = [[${windSpeedsPointsList}]];
+
+    //  Only a test
+    /*
+    temps.forEach(myFunction);
+    function myFunction(value, index, array) {
+      console.log(value);
+    }*/
+
+    temps.map(convertMillsToDate);
+    humidities.map(convertMillsToDate);
+    windspeeds.map(convertMillsToDate);
+
+    function convertMillsToDate(item) {
+      item.x = new Date(item.x);
+    }
+
+    var chart1 = new CanvasJS.Chart("tempsAndHumidity", {
+      animationEnabled: true,
+      theme: "light2",
+      exportEnabled: false,
+      title: {
+        text: "Ambient Temperature / Humidity"
+      },
+      toolTip: {
+        shared: true
+      },
+      axisX: {
+        intervalType: "hour",
+        valueFormatString: "HH:mm"
+      },
+      axisY: {
+        suffix: " °C",
+        title: "Temperature",
+        includeZero: true,
+        valueFormatString: "#,##0",
+        lineColor: "#f54242",
+        titleFontColor: "#f54242",
+        labelFontColor: "#f54242"
+      },
+      axisY2: {
+        suffix: " %",
+        title: "Humidity",
+        includeZero: true,
+        lineColor: "#4245f5",
+        titleFontColor: "#4245f5",
+        labelFontColor: "#4245f5"
+      },
+      data: [{
+        type: "column",
+        name: "Humidity",
+        axisYType: "secondary",
+        axisYIndex: 1,
+        xValueType: "dateTime",
+        xValueFormatString: "HH:mm",
+        yValueFormatString: "#0,#0 %",
+        lineColor: "#4245f5",
+        color: "#4245f5",
+        dataPoints: []
+      }, {
+        type: "line",
+        name: "Temperature",
+        xValueType: "dateTime",
+        xValueFormatString: "HH:mm",
+        yValueType: "number",
+        yValueFormatString: "#,##0 °C",
+        lineColor: "#f54242",
+        color: "#f54242",
+        dataPoints: []
+      }]
+    });
+
+    var chartWindSpeed = new CanvasJS.Chart("windSpeed", {
+      animationEnabled: true,
+      theme: "light2",
+      exportEnabled: false,
+      title: {
+        text: "Wind speed"
+      },
+      toolTip: {
+        shared: true
+      },
+      axisX: {
+        intervalType: "hour",
+        valueFormatString: "HH:mm"
+      },
+      axisY: {
+        suffix: " m/s",
+        title: "Wind speed",
+        includeZero: true
+      },
+      data: [{
+        type: "spline",
+        name: "Wind speed",
+        xValueType: "dateTime",
+        xValueFormatString: "HH:mm",
+        yValueType: "number",
+        yValueFormatString: "# m/s",
+        dataPoints: []
+      }]
+    });
+
+    chart1.options.data[1].dataPoints = temps;
+    chart1.options.data[0].dataPoints = humidities;
+    chartWindSpeed.options.data[0].dataPoints = windspeeds;
+
+
+    chart1.render();
+    chartWindSpeed.render();
+
+  }
+  /*]]>*/
+</script>
+<div id="latestWeather">
+<h1>Weather Today</h1>
+Temperatur: <b th:text="${weather.ambientTemperature}" /> °C<br>
+Luftfeuchtigkeit: <b th:text="${weather.humidity}" /> %<br>
+Windgeschwindigkeit: <b th:text="${weather.windSpeed}" /> m/s<br>
+Böhengeschwindigkeit: <b th:text="${weather.windGustSpeed}" /> m/s<br>
+Regen in den letzten 5 min: <b th:text="${weather.rainfall}" /><br>
+Zeit des Datensatzes: <b th:text="${weather.timeStamp}" /><br>
+</div>
+<div id="tempsAndHumidity" style="height: 370px; width: 100%;"></div>
+<div id="windSpeed" style="height: 370px; width: 100%;"></div>
+<script src="https://canvasjs.com/assets/script/canvasjs.min.js"></script>
+</body>
+</html>

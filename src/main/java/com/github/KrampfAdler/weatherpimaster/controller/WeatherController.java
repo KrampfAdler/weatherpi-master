@@ -29,27 +29,36 @@ public class WeatherController {
         return "weather";
     }
 
-    @GetMapping(path = "/weather/tempsToday")
+    @GetMapping(path = "/weather/today")
     public String getTempsToday(Model model){
-        List<Map<Object,Object>> tempsdataPoints1 = new ArrayList<Map<Object,Object>>();
-        List<Map<Object,Object>> humititydataPoints1 = new ArrayList<Map<Object,Object>>();
+        List<Map<Object,Object>> tempsDataPoints = new ArrayList<Map<Object,Object>>();
+        List<Map<Object,Object>> humitityDataPoints = new ArrayList<Map<Object,Object>>();
+        List<Map<Object,Object>> windSpeedDataPoints = new ArrayList<Map<Object,Object>>();
         Calendar now = Calendar.getInstance();
         Calendar yesterday = Calendar.getInstance();
         yesterday.add(Calendar.DATE, -1);
-        for(WeatherMesurement weatherMesurement : weatherMesurementRepository.findAllByCreatedBetween(yesterday.getTime(), now.getTime())){
-            Map<Object,Object> map = new HashMap<Object,Object>();
-            map.put("x", weatherMesurement.getCreated().getTime());
-            map.put("y", weatherMesurement.getAmbientTemperature());
-            tempsdataPoints1.add(map);
-            Map<Object,Object> map2 = new HashMap<Object,Object>();
-            map2.put("x", weatherMesurement.getCreated().getTime());
-            map2.put("y", weatherMesurement.getHumidity());
-            humititydataPoints1.add(map2);
+        //for(WeatherMesurement weatherMesurement : weatherMesurementRepository.findAllByCreatedBetween(yesterday.getTime(), now.getTime())){
+        for(WeatherMesurement weatherMesurement : weatherMesurementRepository.findTop288ByOrderByIdDesc()){
+            Map<Object,Object> tempsMap = new HashMap<Object,Object>();
+            tempsMap.put("x", weatherMesurement.getCreated().getTime());
+            tempsMap.put("y", weatherMesurement.getAmbientTemperature());
+            tempsDataPoints.add(tempsMap);
+            Map<Object,Object> humidityMap = new HashMap<Object,Object>();
+            humidityMap.put("x", weatherMesurement.getCreated().getTime());
+            humidityMap.put("y", weatherMesurement.getHumidity());
+            humitityDataPoints.add(humidityMap);
+            Map<Object,Object> windSpeedMap = new HashMap<Object,Object>();
+            windSpeedMap.put("x", weatherMesurement.getCreated().getTime());
+            windSpeedMap.put("y", weatherMesurement.getWindSpeed());
+            windSpeedDataPoints.add(windSpeedMap);
 
         }
-        model.addAttribute("tempPointsList", tempsdataPoints1);
-        model.addAttribute("humidityPointsList", humititydataPoints1);
-        return "tempsToday";
+        model.addAttribute("tempPointsList", tempsDataPoints);
+        model.addAttribute("humidityPointsList", humitityDataPoints);
+        model.addAttribute("windSpeedsPointsList", windSpeedDataPoints);
+        WeatherMesurement weather = weatherMesurementRepository.findTopByOrderByIdDesc();
+        model.addAttribute("weather", weather);
+        return "today";
     }
 
     @GetMapping(path = "/weather/tempsMonth")

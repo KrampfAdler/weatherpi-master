@@ -11,7 +11,7 @@ public interface WeatherMesurementRepository extends CrudRepository<WeatherMesur
 
     WeatherMesurement findTopByOrderByIdDesc();
 
-    List<WeatherMesurement> findTop10ByOrderByIdDesc();
+    List<WeatherMesurement> findTop288ByOrderByIdDesc();
 
     List<WeatherMesurement> findAllByCreatedBetween(Date start, Date end);
 }
