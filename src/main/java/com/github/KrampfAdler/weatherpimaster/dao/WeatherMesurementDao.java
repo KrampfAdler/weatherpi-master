@@ -1,55 +1,30 @@
-package com.github.KrampfAdler.weatherpimaster.model.entity;
+package com.github.KrampfAdler.weatherpimaster.dao;
 
+import com.github.KrampfAdler.weatherpimaster.model.entity.WeatherMesurement;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import javax.persistence.*;
-import java.io.Serializable;
 
-@Entity
-@Table(name="WEATHER_MEASUREMENT",uniqueConstraints = {
-        @UniqueConstraint(columnNames = "ID"), })
-public class WeatherMesurement implements Serializable {
+public class WeatherMesurementDao {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "ID", unique = true, nullable = false, columnDefinition="BIGINT")
-    private Long id;
-
-    @Column(name = "REMOTE_ID", nullable = false, columnDefinition="BIGINT")
-    private Long remoteId;
-
-    @Column(name = "AMBIENT_TEMPERATURE", columnDefinition="Decimal(6,2)")
     private double ambientTemperature;
 
-    @Column(name = "HUMIDITY", columnDefinition="Decimal(6,2)")
     private double humidity;
 
-    @Column(name = "WIND_SPEED", columnDefinition="Decimal(6,2)")
     private double windSpeed;
 
-    @Column(name = "WIND_GUST_SPEED", columnDefinition="Decimal(6,2)")
     private double windGustSpeed;
 
-    @Column(name = "RAINFALL", columnDefinition="Decimal(6,2)")
     private double rainfall;
 
-    @Column(name = "CREATED", columnDefinition="TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP")
     private Date created;
 
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        id = id;
-    }
-
-    public Long getRemoteId() {
-        return remoteId;
-    }
-
-    public void setRemoteId(Long remoteId) {
-        this.remoteId = remoteId;
+    public WeatherMesurementDao(WeatherMesurement weatherMesurement) {
+        this.setAmbientTemperature(weatherMesurement.getAmbientTemperature());
+        this.setCreated(weatherMesurement.getCreated());
+        this.setHumidity(weatherMesurement.getHumidity());
+        this.setWindSpeed(weatherMesurement.getWindSpeed());
+        this.setWindGustSpeed(weatherMesurement.getWindGustSpeed());
+        this.setRainfall(weatherMesurement.getRainfall());
     }
 
     public double getAmbientTemperature() {
@@ -98,5 +73,13 @@ public class WeatherMesurement implements Serializable {
 
     public void setCreated(Date created) {
         this.created = created;
+    }
+
+    public String getTimeStamp(){
+        if(created != null){
+            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss");
+            return simpleDateFormat.format(created);
+        }
+        return null;
     }
 }

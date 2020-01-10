@@ -1,6 +1,7 @@
 package com.github.KrampfAdler.weatherpimaster.controller;
 
 
+import com.github.KrampfAdler.weatherpimaster.dao.WeatherMesurementDao;
 import com.github.KrampfAdler.weatherpimaster.model.entity.WeatherMesurement;
 import com.github.KrampfAdler.weatherpimaster.model.repository.WeatherMesurementRepository;
 import com.google.gson.Gson;
@@ -15,8 +16,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 @Controller
 public class WeatherController {
 
-
-
     @Autowired
     private WeatherMesurementRepository weatherMesurementRepository;
 
@@ -24,9 +23,7 @@ public class WeatherController {
     public String getWeather(Model model){
         Gson gson = new Gson();
         WeatherMesurement weather = weatherMesurementRepository.findTopByOrderByIdDesc();
-        String json = gson.toJson(weather);
-        model.addAttribute("weather", weather);
-        return "weather";
+        return gson.toJson(weather);
     }
 
     @GetMapping(path = "/weather/today")
@@ -34,29 +31,74 @@ public class WeatherController {
         List<Map<Object,Object>> tempsDataPoints = new ArrayList<Map<Object,Object>>();
         List<Map<Object,Object>> humitityDataPoints = new ArrayList<Map<Object,Object>>();
         List<Map<Object,Object>> windSpeedDataPoints = new ArrayList<Map<Object,Object>>();
+        List<Map<Object,Object>> windSpeedGustDataPoints = new ArrayList<Map<Object,Object>>();
+        List<Map<Object,Object>> rainFallDataPoints = new ArrayList<Map<Object,Object>>();
         Calendar now = Calendar.getInstance();
         Calendar yesterday = Calendar.getInstance();
+        Calendar timeMemory = Calendar.getInstance();
         yesterday.add(Calendar.DATE, -1);
-        //for(WeatherMesurement weatherMesurement : weatherMesurementRepository.findAllByCreatedBetween(yesterday.getTime(), now.getTime())){
-        for(WeatherMesurement weatherMesurement : weatherMesurementRepository.findTop288ByOrderByIdDesc()){
+        double rainPerHour = 0;
+        for(WeatherMesurement weatherMesurement : weatherMesurementRepository.findAllByCreatedBetween(yesterday.getTime(), now.getTime())){
+        //for(WeatherMesurement weatherMesurement : weatherMesurementRepository.findTop288ByOrderByIdDesc()){
+            // Temperatures
             Map<Object,Object> tempsMap = new HashMap<Object,Object>();
             tempsMap.put("x", weatherMesurement.getCreated().getTime());
             tempsMap.put("y", weatherMesurement.getAmbientTemperature());
             tempsDataPoints.add(tempsMap);
+
+            // Humidity
             Map<Object,Object> humidityMap = new HashMap<Object,Object>();
             humidityMap.put("x", weatherMesurement.getCreated().getTime());
             humidityMap.put("y", weatherMesurement.getHumidity());
             humitityDataPoints.add(humidityMap);
+
+            // Wind speed
             Map<Object,Object> windSpeedMap = new HashMap<Object,Object>();
             windSpeedMap.put("x", weatherMesurement.getCreated().getTime());
             windSpeedMap.put("y", weatherMesurement.getWindSpeed());
             windSpeedDataPoints.add(windSpeedMap);
 
+            // Wind gust speed
+            Map<Object,Object> windGustSpeedMap = new HashMap<Object,Object>();
+            windGustSpeedMap.put("x", weatherMesurement.getCreated().getTime());
+            windGustSpeedMap.put("y", weatherMesurement.getWindGustSpeed());
+            windSpeedGustDataPoints.add(windGustSpeedMap);
+
+            Calendar date = Calendar.getInstance();
+            date.setTime(weatherMesurement.getCreated());
+            boolean sameHour = date.get(Calendar.HOUR_OF_DAY) == timeMemory.get(Calendar.HOUR_OF_DAY);
+            if(sameHour) {
+                rainPerHour += weatherMesurement.getRainfall();
+            }else{
+                Map<Object,Object> rainFallMap = new HashMap<Object,Object>();
+                timeMemory.set(Calendar.MINUTE, 0);
+                timeMemory.set(Calendar.SECOND, 0);
+                rainFallMap.put("x", weatherMesurement.getCreated().getTime());
+                rainFallMap.put("y", rainPerHour);
+                rainFallDataPoints.add(rainFallMap);
+
+                timeMemory.setTime(weatherMesurement.getCreated());
+                rainPerHour = 0;
+            }
         }
         model.addAttribute("tempPointsList", tempsDataPoints);
         model.addAttribute("humidityPointsList", humitityDataPoints);
         model.addAttribute("windSpeedsPointsList", windSpeedDataPoints);
-        WeatherMesurement weather = weatherMesurementRepository.findTopByOrderByIdDesc();
+        model.addAttribute("windGustSpeedsPointsList", windSpeedGustDataPoints);
+        model.addAttribute("rainFallPointsList", rainFallDataPoints);
+
+
+        WeatherMesurement newestWeatherMesurement = weatherMesurementRepository.findTopByOrderByIdDesc();
+        Calendar minus1Hour = Calendar.getInstance();
+        minus1Hour.add(Calendar.HOUR, -1);
+        double rain = 0;
+        for(WeatherMesurement weatherMesurement : weatherMesurementRepository.findAllByCreatedBetween(minus1Hour.getTime(), now.getTime())){
+            rain += weatherMesurement.getRainfall();
+        }
+
+        WeatherMesurementDao weather = new WeatherMesurementDao(newestWeatherMesurement);
+        weather.setRainfall(rain);
+
         model.addAttribute("weather", weather);
         return "today";
     }
