@@ -119,10 +119,10 @@
         contentFormatter: function ( e ) {
           var content = " ";
           content += addZero(e.entries[0].dataPoint.x.getHours()) + ":" + addZero(e.entries[0].dataPoint.x.getMinutes()) + "</br>";
-          content += "<span style='color:#6D78AD;'>" + e.entries[0].dataSeries.name + ":</span> " + "<strong>" + parseFloat(e.entries[0].dataPoint.y).toFixed(2) + "</strong> km/h";
+          content += "<span style='color:#C24642;'>" + e.entries[1].dataSeries.name + ":</span> " + "<strong>" + parseFloat(e.entries[1].dataPoint.y).toFixed(2) + "</strong> km/h";
           content = content.replace(".", ",");
           content += "<br/>";
-          content += "<span style='color:#C24642;'>" + e.entries[1].dataSeries.name + ":</span> " + "<strong>" + parseFloat(e.entries[1].dataPoint.y).toFixed(2) + "</strong> km/h";
+          content += "<span style='color:#6D78AD;'>" + e.entries[0].dataSeries.name + ":</span> " + "<strong>" + parseFloat(e.entries[0].dataPoint.y).toFixed(2) + "</strong> km/h";
           content = content.replace(".", ",");
           content += "<br/>";
 
@@ -157,6 +157,7 @@
       },{
         type: "line",
         name: "Gust speed",
+        color: "#C24642",
         xValueType: "dateTime",
         xValueFormatString: "HH:mm",
         yValueType: "number",
@@ -231,8 +232,8 @@
 <h1>Weather Today</h1>
 Temperatur: <b th:text="${#strings.replace(weather.ambientTemperature, '.', ',')}" /> °C<br>
 Luftfeuchtigkeit: <b th:text="${#strings.replace(weather.humidity, '.', ',')}" /> %<br>
-Windgeschwindigkeit: <b th:text="${#strings.replace(weather.windSpeed, '.', ',')}" /> m/s<br>
-Böhengeschwindigkeit: <b th:text="${#strings.replace(weather.windGustSpeed, '.', ',')}" /> m/s<br>
+Windgeschwindigkeit: <b th:text="${#strings.replace(weather.windSpeed, '.', ',')}" /> km/h<br>
+Böhengeschwindigkeit: <b th:text="${#strings.replace(weather.windGustSpeed, '.', ',')}" /> km/h<br>
 Regen in der letzten Stunde: <b th:text="${#strings.replace(weather.rainfall, '.', ',')}" /> mm/m^2<br>
 Zeit des Datensatzes: <b th:text="${weather.timeStamp}" /><br>
 </div>
