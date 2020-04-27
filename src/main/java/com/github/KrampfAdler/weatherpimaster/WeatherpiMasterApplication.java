@@ -8,6 +8,10 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
+import javax.annotation.PostConstruct;
+import java.util.Date;
+import java.util.TimeZone;
+
 @SpringBootApplication
 @EnableJpaRepositories(
 		basePackages = { "com.github.KrampfAdler.weatherpimaster.model.repository" })
@@ -23,4 +27,10 @@ public class WeatherpiMasterApplication {
 		SpringApplication.run(WeatherpiMasterApplication.class, args);
 	}
 
+	@PostConstruct
+	public void init(){
+		// Setting Spring Boot SetTimeZone
+		TimeZone.setDefault(TimeZone.getTimeZone("Europe/Berlin"));
+		System.out.println("Startup Time : " + new Date().toString());
+	}
 }

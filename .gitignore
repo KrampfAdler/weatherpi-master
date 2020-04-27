@@ -29,3 +29,6 @@ build/
 
 ### VS Code ###
 .vscode/
+
+### Aritfacts ###
+/out/artifacts/weatherpi_master_jar/

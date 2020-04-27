@@ -1,14 +1,13 @@
 package com.github.KrampfAdler.weatherpimaster.model.entity;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import javax.persistence.*;
 import java.io.Serializable;
+import java.sql.Timestamp;
 
 @Entity
 @Table(name="WEATHER_MEASUREMENT",uniqueConstraints = {
         @UniqueConstraint(columnNames = "ID"), })
-public class WeatherMesurement implements Serializable {
+public class WeatherMeasurement implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -34,7 +33,7 @@ public class WeatherMesurement implements Serializable {
     private double rainfall;
 
     @Column(name = "CREATED", columnDefinition="TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP")
-    private Date created;
+    private Timestamp created;
 
     public Long getId() {
         return id;
@@ -92,11 +91,11 @@ public class WeatherMesurement implements Serializable {
         this.rainfall = rainfall;
     }
 
-    public Date getCreated() {
+    public Timestamp getCreated() {
         return created;
     }
 
-    public void setCreated(Date created) {
+    public void setCreated(Timestamp created) {
         this.created = created;
     }
 }

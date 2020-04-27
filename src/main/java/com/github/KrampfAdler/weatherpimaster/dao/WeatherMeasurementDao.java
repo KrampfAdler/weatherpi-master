@@ -1,10 +1,12 @@
 package com.github.KrampfAdler.weatherpimaster.dao;
 
-import com.github.KrampfAdler.weatherpimaster.model.entity.WeatherMesurement;
+import com.github.KrampfAdler.weatherpimaster.model.entity.WeatherMeasurement;
+
+import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-public class WeatherMesurementDao {
+public class WeatherMeasurementDao {
 
     private double ambientTemperature;
 
@@ -16,15 +18,15 @@ public class WeatherMesurementDao {
 
     private double rainfall;
 
-    private Date created;
+    private Timestamp created;
 
-    public WeatherMesurementDao(WeatherMesurement weatherMesurement) {
-        this.setAmbientTemperature(weatherMesurement.getAmbientTemperature());
-        this.setCreated(weatherMesurement.getCreated());
-        this.setHumidity(weatherMesurement.getHumidity());
-        this.setWindSpeed(weatherMesurement.getWindSpeed());
-        this.setWindGustSpeed(weatherMesurement.getWindGustSpeed());
-        this.setRainfall(weatherMesurement.getRainfall());
+    public WeatherMeasurementDao(WeatherMeasurement weatherMeasurement) {
+        this.setAmbientTemperature(weatherMeasurement.getAmbientTemperature());
+        this.setCreated(weatherMeasurement.getCreated());
+        this.setHumidity(weatherMeasurement.getHumidity());
+        this.setWindSpeed(weatherMeasurement.getWindSpeed());
+        this.setWindGustSpeed(weatherMeasurement.getWindGustSpeed());
+        this.setRainfall(weatherMeasurement.getRainfall());
     }
 
     public double getAmbientTemperature() {
@@ -67,18 +69,19 @@ public class WeatherMesurementDao {
         this.rainfall = rainfall;
     }
 
-    public Date getCreated() {
+    public Timestamp getCreated() {
         return created;
     }
 
-    public void setCreated(Date created) {
+    public void setCreated(Timestamp created) {
         this.created = created;
     }
 
     public String getTimeStamp(){
         if(created != null){
+            Date date = new Date(created.getTime());
             SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss");
-            return simpleDateFormat.format(created);
+            return simpleDateFormat.format(date);
         }
         return null;
     }
