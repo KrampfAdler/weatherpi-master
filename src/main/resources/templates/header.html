@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<head>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:400,800" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="/css/style.css"/>
+</head>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+<body>
+    <div th:fragment="myHeader">
+        <div class="header">
+            <div class="inner_header">
+                <div class="logo_container">
+                    <h1>MY<span>WEATHER</span></h1>
+                </div>
+                <ul class="navigation">
+                    <a href="/weather/today"><li>Heute</li></a>
+                    <a href="/weather/month"><li>Monat</li></a>
+                </ul>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

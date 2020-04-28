@@ -1,245 +1,249 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
 <head>
   <meta charset="UTF-8">
-  <title>Weather Heute</title>
+  <link href="https://fonts.googleapis.com/css?family=Montserrat:400,800" rel="stylesheet">
   <link rel="stylesheet" type="text/css" href="/css/today.css"/>
+  <link rel="stylesheet" type="text/css" href="/css/style.css"/>
+
+  <title>Weather Heute</title>
 </head>
 <body>
+  <script th:inline="javascript">
+    window.onload = function () {
+      var temps = [[${tempPointsList}]];
+      var humidities = [[${humidityPointsList}]];
+      var windSpeeds = [[${windSpeedsPointsList}]];
+      var windGustSpeeds = [[${windGustSpeedsPointsList}]];
+      var rainFalls = [[${rainFallPointsList}]];
 
-<script th:inline="javascript">
-  /*<![CDATA[*/
-  window.onload = function () {
-    var temps = [[${tempPointsList}]];
-    var humidities = [[${humidityPointsList}]];
-    var windSpeeds = [[${windSpeedsPointsList}]];
-    var windGustSpeeds = [[${windGustSpeedsPointsList}]];
-    var rainFalls = [[${rainFallPointsList}]];
+      temps.map(convertMillsToDate);
+      humidities.map(convertMillsToDate);
+      windSpeeds.map(convertMillsToDate);
+      rainFalls.map(convertMillsToDate);
+      windGustSpeeds.map(convertMillsToDate);
 
-    //  Only a test
-  /*
-    windspeeds.forEach(myFunction);
-    function myFunction(value, index, array) {
-      console.log(value);
-    }
-*/
-    temps.map(convertMillsToDate);
-    humidities.map(convertMillsToDate);
-    windSpeeds.map(convertMillsToDate);
-    rainFalls.map(convertMillsToDate);
-    windGustSpeeds.map(convertMillsToDate);
-
-    function convertMillsToDate(item) {
-      item.x = new Date(item.x);
-    }
-
-    function addZero(i) {
-      if (i < 10) {
-        i = "0" + i;
+      function convertMillsToDate(item) {
+        item.x = new Date(item.x);
       }
-      return i;
+
+      function addZero(i) {
+        if (i < 10) {
+          i = "0" + i;
+        }
+        return i;
+      }
+
+      var chart1 = new CanvasJS.Chart("tempsAndHumidity", {
+        animationEnabled: true,
+        theme: "light2",
+        exportEnabled: false,
+        title: {
+          text: "Umgebungstemperatur / Luftfeuchtigkeit",
+          fontFamily: 'Montserrat',
+          fontColor: "black"
+        },
+        toolTip: {
+          shared: true,
+          fontFamily: 'Montserrat',
+          contentFormatter: function ( e ) {
+            var content = " ";
+            content += addZero(e.entries[0].dataPoint.x.getHours()) + ":" + addZero(e.entries[0].dataPoint.x.getMinutes()) + "</br>";
+            content += "<span style='color:#f54242;'>" + e.entries[1].dataSeries.name + ":</span> " + "<strong>" + parseFloat(e.entries[1].dataPoint.y).toFixed(1) + "</strong> °C";
+            content = content.replace(".", ",");
+            content += "<br/>";
+            content += "<span style='color:#4245f5;'>" + e.entries[0].dataSeries.name + ":</span> " + "<strong>" + parseFloat(e.entries[0].dataPoint.y).toFixed(2) + "</strong> %";
+            content = content.replace(".", ",");
+            content += "<br/>";
+            return content;
+          }
+        },
+        axisX: {
+          intervalType: "hour",
+          valueFormatString: "HH:mm"
+        },
+        axisY: {
+          suffix: " °C",
+          title: "Temperatur",
+          includeZero: true,
+          valueFormatString: "#,##0",
+          lineColor: "#f54242",
+          titleFontColor: "#f54242",
+          labelFontColor: "#f54242"
+        },
+        axisY2: {
+          suffix: " %",
+          title: "Luftfeuchtigkeit",
+          maximum: 100,
+          includeZero: true,
+          lineColor: "#4245f5",
+          titleFontColor: "#4245f5",
+          labelFontColor: "#4245f5"
+        },
+        data: [{
+          type: "column",
+          name: "Luftfeuchtigkeit",
+          axisYType: "secondary",
+          axisYIndex: 1,
+          xValueType: "dateTime",
+          xValueFormatString: "HH:mm",
+          yValueFormatString: "#0,#0 %",
+          lineColor: "#4245f5",
+          color: "#4245f5",
+          dataPoints: []
+        }, {
+          type: "line",
+          name: "Temperatur",
+          xValueType: "dateTime",
+          xValueFormatString: "HH:mm",
+          yValueType: "number",
+          yValueFormatString: "#,##0 °C",
+          lineColor: "#f54242",
+          color: "#f54242",
+          dataPoints: []
+        }]
+      });
+
+      var chartWindSpeed = new CanvasJS.Chart("windSpeed", {
+        animationEnabled: true,
+        theme: "light2",
+        exportEnabled: false,
+        title: {
+          text: "Windgeschwindigkeit",
+          fontFamily: 'Montserrat',
+          fontColor: "black"
+        },
+        toolTip: {
+          shared: true,
+          fontFamily: 'Montserrat',
+          contentFormatter: function ( e ) {
+            var content = " ";
+            content += addZero(e.entries[0].dataPoint.x.getHours()) + ":" + addZero(e.entries[0].dataPoint.x.getMinutes()) + "</br>";
+            content += "<span style='color:#C24642;'>" + e.entries[1].dataSeries.name + ":</span> " + "<strong>" + parseFloat(e.entries[1].dataPoint.y).toFixed(2) + "</strong> km/h";
+            content = content.replace(".", ",");
+            content += "<br/>";
+            content += "<span style='color:#6D78AD;'>" + e.entries[0].dataSeries.name + ":</span> " + "<strong>" + parseFloat(e.entries[0].dataPoint.y).toFixed(2) + "</strong> km/h";
+            content = content.replace(".", ",");
+            content += "<br/>";
+
+            return content;
+          }
+        },
+        axisX: {
+          intervalType: "hour",
+          valueFormatString: "HH:mm"
+        },
+        axisY: [{
+          suffix: " km/h",
+          title: "Windgeschwindigkeit",
+          includeZero: true
+        },
+          {
+            suffix: " km/h",
+            title: "Böengeschwindigkeit",
+            includeZero: true,
+            lineColor: "#C24642",
+            titleFontColor: "#C24642",
+            labelFontColor: "#C24642"
+          }],
+        data: [{
+          type: "spline",
+          name: "Windgeschwindigkeit",
+          xValueType: "dateTime",
+          xValueFormatString: "HH:mm",
+          yValueType: "number",
+          yValueFormatString: "# km/h",
+          dataPoints: []
+        },{
+          type: "line",
+          name: "Böengeschwindigkeit",
+          color: "#C24642",
+          xValueType: "dateTime",
+          xValueFormatString: "HH:mm",
+          yValueType: "number",
+          yValueFormatString: "# km/h",
+          dataPoints: []
+        }]
+      });
+
+      var rainChart = new CanvasJS.Chart("rainFall", {
+        animationEnabled: true,
+        theme: "light2",
+        exportEnabled: false,
+        title: {
+          text: "Niederschlag",
+          fontFamily: 'Montserrat',
+          fontColor: "black"
+        },
+        toolTip: {
+          shared: true,
+          fontFamily: 'Montserrat',
+          contentFormatter: function ( e ) {
+            var content = " ";
+            content += addZero(e.entries[0].dataPoint.x.getHours()) + ":" + addZero(e.entries[0].dataPoint.x.getMinutes()) + "</br>";
+            content += "<span style='color:#4245f5;'>" + e.entries[0].dataSeries.name + ":</span> " + "<strong>" + parseFloat(e.entries[0].dataPoint.y).toFixed(2) + "</strong> mm/m^2 ";
+            content = content.replace(".", ",");
+            content += "<br/>";
+
+            return content;
+          }
+        },
+        axisX: {
+          intervalType: "hour",
+          valueFormatString: "HH:mm"
+        },
+        axisY: {
+          suffix: " mm/m2",
+          title: "Niederschlag",
+          includeZero: true,
+          lineColor: "#4245f5",
+          titleFontColor: "#4245f5",
+          labelFontColor: "#4245f5"
+        },
+        data: [{
+          type: "column",
+          name: "Niederschlag",
+          xValueType: "dateTime",
+          xValueFormatString: "HH:mm",
+          yValueFormatString: "#,# mm/m^2",
+          lineColor: "#4245f5",
+          color: "#4245f5",
+          dataPoints: []
+        }]
+      });
+
+      chart1.options.data[1].dataPoints = temps;
+      chart1.options.data[0].dataPoints = humidities;
+      chartWindSpeed.options.data[0].dataPoints = windSpeeds;
+      chartWindSpeed.options.data[1].dataPoints = windGustSpeeds;
+      rainChart.options.data[0].dataPoints = rainFalls;
+
+
+      chart1.render();
+      chartWindSpeed.render();
+      rainChart.render();
+
     }
 
-    var chart1 = new CanvasJS.Chart("tempsAndHumidity", {
-      animationEnabled: true,
-      theme: "light2",
-      exportEnabled: false,
-      title: {
-        text: "Umgebungstemperatur / Luftfeuchtigkeit"
-      },
-      toolTip: {
-        shared: true,
-        contentFormatter: function ( e ) {
-          var content = " ";
-          content += addZero(e.entries[0].dataPoint.x.getHours()) + ":" + addZero(e.entries[0].dataPoint.x.getMinutes()) + "</br>";
-          content += "<span style='color:#f54242;'>" + e.entries[1].dataSeries.name + ":</span> " + "<strong>" + parseFloat(e.entries[1].dataPoint.y).toFixed(1) + "</strong> °C";
-          content = content.replace(".", ",");
-          content += "<br/>";
-          content += "<span style='color:#4245f5;'>" + e.entries[0].dataSeries.name + ":</span> " + "<strong>" + parseFloat(e.entries[0].dataPoint.y).toFixed(2) + "</strong> %";
-          content = content.replace(".", ",");
-          content += "<br/>";
-          return content;
-        }
-      },
-      axisX: {
-        intervalType: "hour",
-        valueFormatString: "HH:mm"
-      },
-      axisY: {
-        suffix: " °C",
-        title: "Temperatur",
-        includeZero: true,
-        valueFormatString: "#,##0",
-        lineColor: "#f54242",
-        titleFontColor: "#f54242",
-        labelFontColor: "#f54242"
-      },
-      axisY2: {
-        suffix: " %",
-        title: "Luftfeuchtigkeit",
-        maximum: 100,
-        includeZero: true,
-        lineColor: "#4245f5",
-        titleFontColor: "#4245f5",
-        labelFontColor: "#4245f5"
-      },
-      data: [{
-        type: "column",
-        name: "Luftfeuchtigkeit",
-        axisYType: "secondary",
-        axisYIndex: 1,
-        xValueType: "dateTime",
-        xValueFormatString: "HH:mm",
-        yValueFormatString: "#0,#0 %",
-        lineColor: "#4245f5",
-        color: "#4245f5",
-        dataPoints: []
-      }, {
-        type: "line",
-        name: "Temperatur",
-        xValueType: "dateTime",
-        xValueFormatString: "HH:mm",
-        yValueType: "number",
-        yValueFormatString: "#,##0 °C",
-        lineColor: "#f54242",
-        color: "#f54242",
-        dataPoints: []
-      }]
-    });
+    //every 5 minutes there will be new data
+    setTimeout(function(){
+      window.location.reload(1);
+    }, 300000);
+  </script>
 
-    var chartWindSpeed = new CanvasJS.Chart("windSpeed", {
-      animationEnabled: true,
-      theme: "light2",
-      exportEnabled: false,
-      title: {
-        text: "Windgeschwindigkeit"
-      },
-      toolTip: {
-        shared: true,
-        contentFormatter: function ( e ) {
-          var content = " ";
-          content += addZero(e.entries[0].dataPoint.x.getHours()) + ":" + addZero(e.entries[0].dataPoint.x.getMinutes()) + "</br>";
-          content += "<span style='color:#C24642;'>" + e.entries[1].dataSeries.name + ":</span> " + "<strong>" + parseFloat(e.entries[1].dataPoint.y).toFixed(2) + "</strong> km/h";
-          content = content.replace(".", ",");
-          content += "<br/>";
-          content += "<span style='color:#6D78AD;'>" + e.entries[0].dataSeries.name + ":</span> " + "<strong>" + parseFloat(e.entries[0].dataPoint.y).toFixed(2) + "</strong> km/h";
-          content = content.replace(".", ",");
-          content += "<br/>";
-
-          return content;
-        }
-      },
-      axisX: {
-        intervalType: "hour",
-        valueFormatString: "HH:mm"
-      },
-      axisY: [{
-        suffix: " km/h",
-        title: "Windgeschwindigkeit",
-        includeZero: true
-      },
-        {
-          suffix: " km/h",
-          title: "Böengeschwindigkeit",
-          includeZero: true,
-          lineColor: "#C24642",
-          titleFontColor: "#C24642",
-          labelFontColor: "#C24642"
-        }],
-      data: [{
-        type: "spline",
-        name: "Windgeschwindigkeit",
-        xValueType: "dateTime",
-        xValueFormatString: "HH:mm",
-        yValueType: "number",
-        yValueFormatString: "# km/h",
-        dataPoints: []
-      },{
-        type: "line",
-        name: "Böengeschwindigkeit",
-        color: "#C24642",
-        xValueType: "dateTime",
-        xValueFormatString: "HH:mm",
-        yValueType: "number",
-        yValueFormatString: "# km/h",
-        dataPoints: []
-      }]
-    });
-
-    var rainChart = new CanvasJS.Chart("rainFall", {
-      animationEnabled: true,
-      theme: "light2",
-      exportEnabled: false,
-      title: {
-        text: "Niederschlag"
-      },
-      toolTip: {
-        shared: true,
-        contentFormatter: function ( e ) {
-          var content = " ";
-          content += addZero(e.entries[0].dataPoint.x.getHours()) + ":" + addZero(e.entries[0].dataPoint.x.getMinutes()) + "</br>";
-          content += "<span style='color:#4245f5;'>" + e.entries[0].dataSeries.name + ":</span> " + "<strong>" + parseFloat(e.entries[0].dataPoint.y).toFixed(2) + "</strong> mm/m^2 ";
-          content = content.replace(".", ",");
-          content += "<br/>";
-
-          return content;
-        }
-      },
-      axisX: {
-        intervalType: "hour",
-        valueFormatString: "HH:mm"
-      },
-      axisY: {
-        suffix: " mm/m2",
-        title: "Niederschlag",
-        includeZero: true,
-        lineColor: "#4245f5",
-        titleFontColor: "#4245f5",
-        labelFontColor: "#4245f5"
-      },
-      data: [{
-        type: "column",
-        name: "Niederschlag",
-        xValueType: "dateTime",
-        xValueFormatString: "HH:mm",
-        yValueFormatString: "#,# mm/m^2",
-        lineColor: "#4245f5",
-        color: "#4245f5",
-        dataPoints: []
-      }]
-    });
-
-    chart1.options.data[1].dataPoints = temps;
-    chart1.options.data[0].dataPoints = humidities;
-    chartWindSpeed.options.data[0].dataPoints = windSpeeds;
-    chartWindSpeed.options.data[1].dataPoints = windGustSpeeds;
-    rainChart.options.data[0].dataPoints = rainFalls;
-
-
-    chart1.render();
-    chartWindSpeed.render();
-    rainChart.render();
-
-  }
-  /*]]>*/
-
-  //every 5 minutes there will be new data
-  setTimeout(function(){
-    window.location.reload(1);
-  }, 300000);
-</script>
-<div id="latestWeather" class="center">
-<h1>Wetter Heute</h1>
-Temperatur: <b th:text="${#strings.replace(weather.ambientTemperature, '.', ',')}" /> °C<br>
-Luftfeuchtigkeit: <b th:text="${#strings.replace(weather.humidity, '.', ',')}" /> %<br>
-Windgeschwindigkeit: <b th:text="${#strings.replace(weather.windSpeed, '.', ',')}" /> km/h<br>
-Böhengeschwindigkeit: <b th:text="${#strings.replace(weather.windGustSpeed, '.', ',')}" /> km/h<br>
-Niederschlag in der letzten Stunde: <b th:text="${#strings.replace(weather.rainfall, '.', ',')}" /> mm/m^2<br>
-Zeit des Datensatzes: <b th:text="${weather.timeStamp}" /><br>
-</div>
-<div id="tempsAndHumidity" style="height: 370px; width: 100%;"></div>
-<div id="windSpeed" style="height: 370px; width: 100%;"></div>
-<div id="rainFall" style="height: 370px; width: 100%;"></div>
-<script src="https://canvasjs.com/assets/script/canvasjs.min.js"></script>
+  <div th:insert="header :: myHeader"></div>
+  <div id="latestWeather" class="center">
+    <h1>Wetter Heute</h1>
+    Temperatur: <b th:text="${#strings.replace(weather.ambientTemperature, '.', ',')}" /> °C<br>
+    Luftfeuchtigkeit: <b th:text="${#strings.replace(weather.humidity, '.', ',')}" /> %<br>
+    Windgeschwindigkeit: <b th:text="${#strings.replace(weather.windSpeed, '.', ',')}" /> km/h<br>
+    Böhengeschwindigkeit: <b th:text="${#strings.replace(weather.windGustSpeed, '.', ',')}" /> km/h<br>
+    Niederschlag in der letzten Stunde: <b th:text="${#strings.replace(weather.rainfall, '.', ',')}" /> mm/m^2<br>
+    Zeit des Datensatzes: <b th:text="${weather.timeStamp}" /><br>
+  </div>
+  <div id="tempsAndHumidity" style="height: 370px; width: 100%;"></div>
+  <div id="windSpeed" style="height: 370px; width: 100%;"></div>
+  <div id="rainFall" style="height: 370px; width: 100%;"></div>
+  <script src="https://canvasjs.com/assets/script/canvasjs.min.js"></script>
 </body>
 </html>

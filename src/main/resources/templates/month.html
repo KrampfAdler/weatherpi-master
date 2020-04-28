@@ -1,150 +1,159 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
 <head>
   <meta charset="UTF-8">
-  <title>Wetter Monat</title>
+  <link href="https://fonts.googleapis.com/css?family=Montserrat:400,800" rel="stylesheet">
   <link rel="stylesheet" type="text/css" href="/css/today.css"/>
+  <link rel="stylesheet" type="text/css" href="/css/style.css"/>
+
+  <title>Wetter Monat</title>
 </head>
 <body>
+  <script th:inline="javascript">
+    /*<![CDATA[*/
+    window.onload = function() {
+      var highs = [[${highDataPointsList}]];
+      var lows = [[${lowDataPointsList}]];
+      var rainFalls = [[${rainFallPointsList}]];
 
-<script th:inline="javascript">
-  /*<![CDATA[*/
-  window.onload = function() {
-    var highs = [[${highDataPointsList}]];
-    var lows = [[${lowDataPointsList}]];
-    var rainFalls = [[${rainFallPointsList}]];
-
-    //  Only a test
-    /*
-    lows.forEach(listFunction);
-    function listFunction(value, index, array) {
-      console.log(value);
-    }
-    */
-
-
-    highs.map(convertMillsToDate);
-    lows.map(convertMillsToDate);
-    rainFalls.map(convertMillsToDate);
-
-    function convertMillsToDate(item) {
-      item.x = new Date(item.x);
-    }
-
-    function addZero(i) {
-      if (i < 10) {
-        i = "0" + i;
+      //  Only a test
+      /*
+      lows.forEach(listFunction);
+      function listFunction(value, index, array) {
+        console.log(value);
       }
-      return i;
-    }
+      */
 
-    var temps = new CanvasJS.Chart("tempsContainer", {
-      animationEnabled: false,
-      theme: "light2",
-      exportEnabled: true,
-      title:{
-        text: "Umgebungstemperatur (Monat)"
-      },
-      toolTip: {
-        shared: true
-      },
-      axisX:{
-        intervalType: "day",
-        valueFormatString: "DD.MM.YYYY"
-      },
-      axisY: {
-        suffix: " °C",
-        title: "Temperatur",
-        includeZero: true,
-        valueFormatString: "#,##0",
-        lineColor: "#f54242",
-        titleFontColor: "#f54242",
-        labelFontColor: "#f54242"
-      },
-      data: [{
-        type: "line",
-        name: "Höchsttemperatur",
-        xValueType: "dateTime",
-        xValueFormatString: "DD.MM.YYYY",
-        yValueFormatString: "#,##0 °C",
-        lineColor:"#f54242",
-        color:"#f54242",
-        dataPoints: []
-      },{
-        type: "line",
-        name: "Tiefsttemperatu",
-        xValueType: "dateTime",
-        xValueFormatString: "DD.MM.YYYY",
-        yValueFormatString: "#,##0 °C",
-        lineColor:"#4245f5",
-        color:"#4245f5",
-        dataPoints: []
-      },]
-    });
 
-   var rainChart = new CanvasJS.Chart("rainFall", {
-      animationEnabled: true,
-      theme: "light2",
-      exportEnabled: true,
-      title: {
-        text: "Niederschlag"
-      },
-      toolTip: {
-        shared: true,
-        contentFormatter: function ( e ) {
-          var content = " ";
-          content += addZero(e.entries[0].dataPoint.x.getDate()) + ";" + addZero(e.entries[0].dataPoint.x.getMonth()) + ";"+ e.entries[0].dataPoint.x.getFullYear() + "</br>";
-          content += "<span style='color:#4245f5;'>" + e.entries[0].dataSeries.name + ":</span> " + "<strong>" + parseFloat(e.entries[0].dataPoint.y).toFixed(2) + "</strong> mm/m^2 ";
-          content = content.split(".").join(",");
-          content = content.split(";").join(".");
-          content += "<br/>";
+      highs.map(convertMillsToDate);
+      lows.map(convertMillsToDate);
+      rainFalls.map(convertMillsToDate);
 
-          return content;
+      function convertMillsToDate(item) {
+        item.x = new Date(item.x);
+      }
+
+      function addZero(i) {
+        if (i < 10) {
+          i = "0" + i;
         }
+        return i;
+      }
 
-      },
-      axisX: {
-        intervalType: "day",
-        valueFormatString: "DD.MM.YYYY"
-      },
-      axisY: {
-        suffix: " mm/m2",
-        title: "Niederschlag",
-        includeZero: true,
-        lineColor: "#4245f5",
-        titleFontColor: "#4245f5",
-        labelFontColor: "#4245f5"
-      },
-      data: [{
-        type: "column",
-        name: "Niederschlag",
-        xValueType: "dateTime",
-        xValueFormatString: "DD.MM.YYYY",
-        yValueFormatString: "#,##0 mm/m^2",
-        lineColor: "#4245f5",
-        color: "#4245f5",
-        dataPoints: []
-      }]
-    });
+      var temps = new CanvasJS.Chart("tempsContainer", {
+        animationEnabled: false,
+        theme: "light2",
+        exportEnabled: true,
+        title:{
+          text: "Umgebungstemperatur (Monat)",
+          fontFamily: 'Montserrat',
+          fontColor: "black"
+        },
+        toolTip: {
+          shared: true,
+          fontFamily: 'Montserrat',
+        },
+        axisX:{
+          intervalType: "day",
+          valueFormatString: "DD.MM.YYYY"
+        },
+        axisY: {
+          suffix: " °C",
+          title: "Temperatur",
+          includeZero: true,
+          valueFormatString: "#,##0",
+          lineColor: "#f54242",
+          titleFontColor: "#f54242",
+          labelFontColor: "#f54242"
+        },
+        data: [{
+          type: "line",
+          name: "Höchsttemperatur",
+          xValueType: "dateTime",
+          xValueFormatString: "DD.MM.YYYY",
+          yValueFormatString: "#,##0 °C",
+          lineColor:"#f54242",
+          color:"#f54242",
+          dataPoints: []
+        },{
+          type: "line",
+          name: "Tiefsttemperatu",
+          xValueType: "dateTime",
+          xValueFormatString: "DD.MM.YYYY",
+          yValueFormatString: "#,##0 °C",
+          lineColor:"#4245f5",
+          color:"#4245f5",
+          dataPoints: []
+        },]
+      });
+
+     var rainChart = new CanvasJS.Chart("rainFall", {
+        animationEnabled: true,
+        theme: "light2",
+        exportEnabled: true,
+        title: {
+          text: "Niederschlag",
+          fontFamily: 'Montserrat',
+          fontColor: "black"
+        },
+        toolTip: {
+          shared: true,
+          fontFamily: 'Montserrat',
+          contentFormatter: function ( e ) {
+            var content = " ";
+            content += addZero(e.entries[0].dataPoint.x.getDate()) + ";" + addZero(e.entries[0].dataPoint.x.getMonth()) + ";"+ e.entries[0].dataPoint.x.getFullYear() + "</br>";
+            content += "<span style='color:#4245f5;'>" + e.entries[0].dataSeries.name + ":</span> " + "<strong>" + parseFloat(e.entries[0].dataPoint.y).toFixed(2) + "</strong> mm/m^2 ";
+            content = content.split(".").join(",");
+            content = content.split(";").join(".");
+            content += "<br/>";
+
+            return content;
+          }
+
+        },
+        axisX: {
+          intervalType: "day",
+          valueFormatString: "DD.MM.YYYY"
+        },
+        axisY: {
+          suffix: " mm/m2",
+          title: "Niederschlag",
+          includeZero: true,
+          lineColor: "#4245f5",
+          titleFontColor: "#4245f5",
+          labelFontColor: "#4245f5"
+        },
+        data: [{
+          type: "column",
+          name: "Niederschlag",
+          xValueType: "dateTime",
+          xValueFormatString: "DD.MM.YYYY",
+          yValueFormatString: "#,##0 mm/m^2",
+          lineColor: "#4245f5",
+          color: "#4245f5",
+          dataPoints: []
+        }]
+      });
 
 
-    /* Update dataPoints from AJAX and render the chart*/
-    temps.options.data[0].dataPoints = lows;
-    temps.options.data[1].dataPoints = highs;
-    rainChart.options.data[0].dataPoints = rainFalls;
-    temps.render();
-    rainChart.render();
+      /* Update dataPoints from AJAX and render the chart*/
+      temps.options.data[0].dataPoints = lows;
+      temps.options.data[1].dataPoints = highs;
+      rainChart.options.data[0].dataPoints = rainFalls;
+      temps.render();
+      rainChart.render();
 
-  }
-  /*]]>*/
-</script>
-<div id="latestWeather" class="center">
-  <h1>Wetter aus dem letzten Monat</h1>
-  </br>
-  </br>
-</div>
-<div id="tempsContainer" style="height: 370px; width: 100%;"></div>
-<div id="rainFall" style="height: 370px; width: 100%;"></div>
-<script src="https://canvasjs.com/assets/script/canvasjs.min.js"></script>
+    }
+    /*]]>*/
+  </script>
+  <div th:insert="header :: myHeader" />
+  <div id="latestWeather" class="center">
+    <h1>Wetter aus dem letzten Monat</h1>
+    </br>
+    </br>
+  </div>
+  <div id="tempsContainer" style="height: 370px; width: 100%;"></div>
+  <div id="rainFall" style="height: 370px; width: 100%;"></div>
+  <script src="https://canvasjs.com/assets/script/canvasjs.min.js"></script>
 </body>
 </html>
