@@ -232,14 +232,34 @@
   </script>
 
   <div th:insert="header :: myHeader"></div>
-  <div id="latestWeather" class="center">
-    <h1>Wetter Heute</h1>
-    Temperatur: <b th:text="${#strings.replace(weather.ambientTemperature, '.', ',')}" /> °C<br>
-    Luftfeuchtigkeit: <b th:text="${#strings.replace(weather.humidity, '.', ',')}" /> %<br>
-    Windgeschwindigkeit: <b th:text="${#strings.replace(weather.windSpeed, '.', ',')}" /> km/h<br>
-    Böhengeschwindigkeit: <b th:text="${#strings.replace(weather.windGustSpeed, '.', ',')}" /> km/h<br>
-    Niederschlag in der letzten Stunde: <b th:text="${#strings.replace(weather.rainfall, '.', ',')}" /> mm/m^2<br>
-    Zeit des Datensatzes: <b th:text="${weather.timeStamp}" /><br>
+  <div id="latestWeather">
+    <table>
+      <caption><h1>Wetter Heute</h1></caption>
+      <tr>
+        <td class="table-text">Temperatur:</td>
+        <td><b th:text="${#strings.replace(weather.ambientTemperature, '.', ',')}" /> °C</td>
+      </tr>
+      <tr>
+        <td class="table-text">Luftfeuchtigkeit:</td>
+        <td><b th:text="${#strings.replace(weather.humidity, '.', ',')}" /> %</td>
+      </tr>
+      <tr>
+        <td class="table-text">Windgeschwindigkeit:</td>
+        <td><b th:text="${#strings.replace(weather.windSpeed, '.', ',')}" /> km/h</td>
+      </tr>
+      <tr>
+        <td class="table-text">Böhengeschwindigkeit:</td>
+        <td><b th:text="${#strings.replace(weather.windGustSpeed, '.', ',')}" /> km/h</td>
+      </tr>
+      <tr>
+        <td class="table-text">Niederschlag in der letzten Stunde:</td>
+        <td><b th:text="${#strings.replace(weather.rainfall, '.', ',')}" /> mm/m^2</td>
+      </tr>
+      <tr>
+        <td class="table-text">Zeit des Datensatzes:</td>
+        <td><b th:text="${weather.timeStamp}" /></td>
+      </tr>
+    </table>
   </div>
   <div id="tempsAndHumidity" style="height: 370px; width: 100%;"></div>
   <div id="windSpeed" style="height: 370px; width: 100%;"></div>
