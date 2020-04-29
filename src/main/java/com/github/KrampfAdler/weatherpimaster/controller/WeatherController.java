@@ -5,17 +5,18 @@ import com.github.KrampfAdler.weatherpimaster.dao.WeatherMeasurementDao;
 import com.github.KrampfAdler.weatherpimaster.model.entity.WeatherMeasurement;
 import com.github.KrampfAdler.weatherpimaster.model.repository.WeatherMeasurementRepository;
 import com.google.gson.Gson;
+import java.sql.Timestamp;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.temporal.ChronoUnit;
+import java.util.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-
-import java.sql.Timestamp;
-import java.time.Instant;
-import java.time.temporal.ChronoUnit;
-import java.util.*;
 
 @Controller
 public class WeatherController {
@@ -111,37 +112,49 @@ public class WeatherController {
         List<Map<Object,Object>> lowDataPoints1 = new ArrayList<Map<Object,Object>>();
         List<Map<Object,Object>> rainDataPoints1 = new ArrayList<Map<Object,Object>>();
 
-        Instant now = Instant.now();
-        Instant x = now.minus(30, ChronoUnit.DAYS);
-        Instant y = x.plus(1 , ChronoUnit.DAYS);
 
-        for(long i = 0; i < 30; i++){
-            List<WeatherMeasurement> weatherMeasurements = weatherMeasurementRepository.findAllByCreatedBetween(Timestamp.from(x), Timestamp.from(y));
-            Map<Object, Object> highMap = new HashMap<Object, Object>();
-            highMap.put("y", Collections.max(weatherMeasurements, new compTemps()).getAmbientTemperature());
-            Map<Object, Object> lowMap = new HashMap<Object, Object>();
-            lowMap.put("y", Collections.min(weatherMeasurements, new compTemps()).getAmbientTemperature());
-            Map<Object, Object> rainMap = new HashMap<Object, Object>();
-            rainMap.put("y", weatherMeasurements.stream().mapToDouble(e -> e.getRainfall()).sum());
+        Instant now = Instant.now().plus(2, ChronoUnit.DAYS).truncatedTo(ChronoUnit.DAYS);
+        System.out.println("now: " + now);
+        Instant nowMinusMonth = now.minus(31, ChronoUnit.DAYS);
 
-            Calendar calendar = Calendar.getInstance();
-            calendar.setTime(weatherMeasurements.get(weatherMeasurements.size() -1).getCreated());
-            calendar.set(Calendar.HOUR_OF_DAY, 0);
-            calendar.set(Calendar.MINUTE, 0);
-            calendar.set(Calendar.SECOND, 0);
-            calendar.set(Calendar.MILLISECOND, 0);
+        List<WeatherMeasurement> weatherMeasurements = weatherMeasurementRepository.findAllByCreatedBetween(Timestamp.from(nowMinusMonth), Timestamp.from(now));
 
-            highMap.put("x", calendar.getTime().getTime());
-            lowMap.put("x", calendar.getTime().getTime());
-            rainMap.put("x", calendar.getTime().getTime());
+        Instant lastDay = nowMinusMonth;
+        List<WeatherMeasurement> measurementsPerDay = new ArrayList<>();
 
-            highDataPoints1.add(highMap);
-            lowDataPoints1.add(lowMap);
-            rainDataPoints1.add(rainMap);
+        Iterator<WeatherMeasurement> iterator = weatherMeasurements.iterator();
+        while (iterator.hasNext()) {
+            WeatherMeasurement weatherMeasurement = iterator.next();
+            if(weatherMeasurement.getCreated().toInstant().truncatedTo(ChronoUnit.DAYS).equals(lastDay) && iterator.hasNext()){
+                measurementsPerDay.add(weatherMeasurement);
+            }else{
+                //TODO: This doesn't work with timezones 2020-04-28 02:02:51.0 will be the next day because of summer time, fix later
+                Map<Object, Object> highMap = new HashMap<Object, Object>();
+                highMap.put("y", Collections.max(measurementsPerDay, new compTemps()).getAmbientTemperature());
+                Map<Object, Object> lowMap = new HashMap<Object, Object>();
+                lowMap.put("y", Collections.min(measurementsPerDay, new compTemps()).getAmbientTemperature());
+                Map<Object, Object> rainMap = new HashMap<Object, Object>();
+                rainMap.put("y", measurementsPerDay.stream().mapToDouble(WeatherMeasurement::getRainfall).sum());
 
-            x = x.plus(1, ChronoUnit.DAYS);
-            y = y.plus(1, ChronoUnit.DAYS);
+                ZonedDateTime zdt = ZonedDateTime.ofInstant(lastDay, ZoneId.systemDefault());
+                Calendar calendar = GregorianCalendar.from(zdt);
+
+                highMap.put("x", calendar.getTime().getTime());
+                lowMap.put("x", calendar.getTime().getTime());
+                rainMap.put("x", calendar.getTime().getTime());
+
+                highDataPoints1.add(highMap);
+                lowDataPoints1.add(lowMap);
+                rainDataPoints1.add(rainMap);
+
+                measurementsPerDay = new ArrayList<>();
+                lastDay = weatherMeasurement.getCreated().toInstant().truncatedTo(ChronoUnit.DAYS);
+                measurementsPerDay.add(weatherMeasurement);
+            }
         }
+
+
+
 
         model.addAttribute("highDataPointsList", highDataPoints1);
         model.addAttribute("lowDataPointsList", lowDataPoints1);

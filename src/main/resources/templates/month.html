@@ -10,20 +10,10 @@
 </head>
 <body>
   <script th:inline="javascript">
-    /*<![CDATA[*/
     window.onload = function() {
       var highs = [[${highDataPointsList}]];
       var lows = [[${lowDataPointsList}]];
       var rainFalls = [[${rainFallPointsList}]];
-
-      //  Only a test
-      /*
-      lows.forEach(listFunction);
-      function listFunction(value, index, array) {
-        console.log(value);
-      }
-      */
-
 
       highs.map(convertMillsToDate);
       lows.map(convertMillsToDate);
@@ -101,7 +91,7 @@
           fontFamily: 'Montserrat',
           contentFormatter: function ( e ) {
             var content = " ";
-            content += addZero(e.entries[0].dataPoint.x.getDate()) + ";" + addZero(e.entries[0].dataPoint.x.getMonth()) + ";"+ e.entries[0].dataPoint.x.getFullYear() + "</br>";
+            content += addZero(e.entries[0].dataPoint.x.getDate()) + ";" + addZero(e.entries[0].dataPoint.x.getMonth() + 1 ) + ";"+ e.entries[0].dataPoint.x.getFullYear() + "</br>";
             content += "<span style='color:#4245f5;'>" + e.entries[0].dataSeries.name + ":</span> " + "<strong>" + parseFloat(e.entries[0].dataPoint.y).toFixed(2) + "</strong> mm/m^2 ";
             content = content.split(".").join(",");
             content = content.split(";").join(".");
@@ -144,7 +134,7 @@
       rainChart.render();
 
     }
-    /*]]>*/
+
   </script>
   <div th:insert="header :: myHeader" />
   <div id="latestWeather" class="center">
