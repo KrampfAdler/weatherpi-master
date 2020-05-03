@@ -172,7 +172,7 @@ public class WeatherController {
         }
     }
 
-    @GetMapping(path = "/weather/{id}", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @GetMapping(path = "/api/{id}", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public String getWeathers(@PathVariable String id) {
         Gson gson = new Gson();
         WeatherMeasurement weather = weatherMeasurementRepository.findById(Long.valueOf(id)).orElse(null);

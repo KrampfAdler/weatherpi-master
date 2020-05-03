@@ -1,0 +1,24 @@
+*{
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    text-decoration: none;
+    font-family: 'Montserrat';
+}
+
+.error_msg{
+    margin: auto;
+    width: 25%;
+    padding: 10px;
+    display: block;
+}
+
+.error_msg .text{
+    text-align: left;
+    margin-top: 20px;
+    margin-bottom: 20px;
+}
+
+.error_msg h2{
+    margin-top: auto;
+}
