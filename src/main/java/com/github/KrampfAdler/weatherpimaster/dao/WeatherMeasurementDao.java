@@ -20,6 +20,8 @@ public class WeatherMeasurementDao {
 
     private Timestamp created;
 
+    private String date;
+
     public WeatherMeasurementDao(WeatherMeasurement weatherMeasurement) {
         this.setAmbientTemperature(weatherMeasurement.getAmbientTemperature());
         this.setCreated(weatherMeasurement.getCreated());
@@ -27,6 +29,10 @@ public class WeatherMeasurementDao {
         this.setWindSpeed(weatherMeasurement.getWindSpeed());
         this.setWindGustSpeed(weatherMeasurement.getWindGustSpeed());
         this.setRainfall(weatherMeasurement.getRainfall());
+
+        Date date = new Date();
+        date.setTime(weatherMeasurement.getCreated().getTime());
+        this.setDate(new SimpleDateFormat("yyyy-MM-dd").format(date));
     }
 
     public double getAmbientTemperature() {
@@ -75,6 +81,14 @@ public class WeatherMeasurementDao {
 
     public void setCreated(Timestamp created) {
         this.created = created;
+    }
+
+    public String getDate() {
+        return date;
+    }
+
+    public void setDate(String date) {
+        this.date = date;
     }
 
     public String getTimeStamp(){

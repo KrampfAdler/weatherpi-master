@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <link href="https://fonts.googleapis.com/css?family=Montserrat:400,800" rel="stylesheet">
   <script src="https://kit.fontawesome.com/0eab21bf78.js" crossorigin="anonymous"></script>
+  <script th:inline="javascript" type="text/javascript" th:src="@{/js/today.js}"></script>
   <link rel="stylesheet" type="text/css" href="/css/today.css"/>
   <link rel="stylesheet" type="text/css" href="/css/style.css"/>
 
@@ -232,8 +233,36 @@
     }, 300000);
   </script>
 
+  <script th:inline="javascript">
+    window.addEvent=function(e,ev,f,c){if(e.addEventListener){e.addEventListener(ev,f,c);}else if(e.attachEvent){var r=e.attachEvent('on'+ev,f);return r;}else{e['on'+ev]=f;}};
+
+    function updateValue(){
+        var findField = document.getElementById('date-picker');
+        var weatherDate = [[${weather.date}]];
+        findField.value = weatherDate;
+    }
+
+    window.addEvent(window, "load", updateValue, false);
+  </script>
+
+
+
   <div th:insert="header :: myHeader"></div>
   <div id="latestWeather">
+    <div id="picker">
+      <label for="date-picker">Ausgewählter Tag:</label>
+
+      <input type="date" id="date-picker" name="date-picker"
+             value="2018-07-22">
+
+      <button id="submit" class="myButton">Reload</button>
+      <script th:inline="javascript">
+        document.getElementById("submit").onclick = function () {
+            var findField = document.getElementById('date-picker');
+            location.href = window.location.href.split('?')[0].concat("?date=",findField.value);
+        };
+  </script>
+    </div>
     <table>
       <caption><h1>Wetter Heute</h1></caption>
       <tr>

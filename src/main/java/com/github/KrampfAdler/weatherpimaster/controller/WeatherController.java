@@ -5,21 +5,24 @@ import com.github.KrampfAdler.weatherpimaster.dao.WeatherMeasurementDao;
 import com.github.KrampfAdler.weatherpimaster.model.entity.WeatherMeasurement;
 import com.github.KrampfAdler.weatherpimaster.model.repository.WeatherMeasurementRepository;
 import com.google.gson.Gson;
-
-import java.math.BigDecimal;
-import java.math.RoundingMode;
-import java.sql.Timestamp;
-import java.time.Instant;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
-import java.time.temporal.ChronoUnit;
-import java.util.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestParam;
+
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.sql.Timestamp;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.temporal.ChronoUnit;
+import java.util.*;
 
 @Controller
 public class WeatherController {
@@ -35,20 +38,42 @@ public class WeatherController {
     }
 
     @GetMapping(path = "/weather/today")
-    public String getTempsToday(Model model){
+    public String getTempsToday(Model model, @RequestParam(value = "date") Optional<String> test){
+
         List<Map<Object,Object>> tempsDataPoints = new ArrayList<Map<Object,Object>>();
         List<Map<Object,Object>> humidityDataPoints = new ArrayList<Map<Object,Object>>();
         List<Map<Object,Object>> windSpeedDataPoints = new ArrayList<Map<Object,Object>>();
         List<Map<Object,Object>> windSpeedGustDataPoints = new ArrayList<Map<Object,Object>>();
         List<Map<Object,Object>> rainFallDataPoints = new ArrayList<Map<Object,Object>>();
+
         Instant now = Instant.now();
         Instant yesterday = Instant.now().minus(1, ChronoUnit.DAYS);
         Calendar timeMemory = Calendar.getInstance();
+
+        if(test.isPresent()){
+            try {
+                SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd", Locale.GERMANY);
+
+                Date date = formatter.parse(test.get());
+                Date date2= new Date();
+
+                SimpleDateFormat fmt = new SimpleDateFormat("yyyyMMdd");
+                if(!fmt.format(date).equals(fmt.format(date2))) {
+                    now = date.toInstant().plus(1, ChronoUnit.DAYS);
+                    yesterday = date.toInstant();
+                    timeMemory.setTime(date);
+                }
+            }catch (ParseException e){
+                //cry
+            }
+        }
+
         timeMemory.set(Calendar.MINUTE, 0);
         timeMemory.set(Calendar.SECOND, 0);
 
         double rainPerHour = 0;
-        for(WeatherMeasurement weatherMeasurement : weatherMeasurementRepository.findAllByCreatedBetween(Timestamp.from(yesterday), Timestamp.from(now))){
+        List<WeatherMeasurement> weatherMeasurements = weatherMeasurementRepository.findAllByCreatedBetween(Timestamp.from(yesterday), Timestamp.from(now));
+        for(WeatherMeasurement weatherMeasurement : weatherMeasurements){
         //for(WeatherMeasurement weatherMeasurement : weatherMeasurementRepository.findTop288ByOrderByIdDesc()){
             // Temperatures
             Map<Object,Object> tempsMap = new HashMap<Object,Object>();
@@ -101,8 +126,8 @@ public class WeatherController {
         model.addAttribute("rainFallPointsList", rainFallDataPoints);
 
 
-        WeatherMeasurement newestWeatherMeasurement = weatherMeasurementRepository.findTopByOrderByIdDesc();
-        Instant minus1Hour = Instant.now().minus(1, ChronoUnit.HOURS);
+        WeatherMeasurement newestWeatherMeasurement = weatherMeasurements.get(weatherMeasurements.size() - 1);
+        Instant minus1Hour = now.minus(1, ChronoUnit.HOURS);
         double rain = 0;
         for(WeatherMeasurement weatherMeasurement : weatherMeasurementRepository.findAllByCreatedBetween(Timestamp.from(minus1Hour), Timestamp.from(now))){
             rain += weatherMeasurement.getRainfall();
