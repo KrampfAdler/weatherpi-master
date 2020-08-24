@@ -5,6 +5,9 @@ import com.github.KrampfAdler.weatherpimaster.dao.WeatherMeasurementDao;
 import com.github.KrampfAdler.weatherpimaster.model.entity.WeatherMeasurement;
 import com.github.KrampfAdler.weatherpimaster.model.repository.WeatherMeasurementRepository;
 import com.google.gson.Gson;
+
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.ZoneId;
@@ -34,13 +37,16 @@ public class WeatherController {
     @GetMapping(path = "/weather/today")
     public String getTempsToday(Model model){
         List<Map<Object,Object>> tempsDataPoints = new ArrayList<Map<Object,Object>>();
-        List<Map<Object,Object>> humitityDataPoints = new ArrayList<Map<Object,Object>>();
+        List<Map<Object,Object>> humidityDataPoints = new ArrayList<Map<Object,Object>>();
         List<Map<Object,Object>> windSpeedDataPoints = new ArrayList<Map<Object,Object>>();
         List<Map<Object,Object>> windSpeedGustDataPoints = new ArrayList<Map<Object,Object>>();
         List<Map<Object,Object>> rainFallDataPoints = new ArrayList<Map<Object,Object>>();
         Instant now = Instant.now();
         Instant yesterday = Instant.now().minus(1, ChronoUnit.DAYS);
         Calendar timeMemory = Calendar.getInstance();
+        timeMemory.set(Calendar.MINUTE, 0);
+        timeMemory.set(Calendar.SECOND, 0);
+
         double rainPerHour = 0;
         for(WeatherMeasurement weatherMeasurement : weatherMeasurementRepository.findAllByCreatedBetween(Timestamp.from(yesterday), Timestamp.from(now))){
         //for(WeatherMeasurement weatherMeasurement : weatherMeasurementRepository.findTop288ByOrderByIdDesc()){
@@ -54,7 +60,7 @@ public class WeatherController {
             Map<Object,Object> humidityMap = new HashMap<Object,Object>();
             humidityMap.put("x", weatherMeasurement.getCreated().getTime());
             humidityMap.put("y", weatherMeasurement.getHumidity());
-            humitityDataPoints.add(humidityMap);
+            humidityDataPoints.add(humidityMap);
 
             // Wind speed
             Map<Object,Object> windSpeedMap = new HashMap<Object,Object>();
@@ -68,6 +74,7 @@ public class WeatherController {
             windGustSpeedMap.put("y", weatherMeasurement.getWindGustSpeed());
             windSpeedGustDataPoints.add(windGustSpeedMap);
 
+            // Rainfall
             Calendar date = Calendar.getInstance();
             date.setTime(weatherMeasurement.getCreated());
             boolean sameHour = date.get(Calendar.HOUR_OF_DAY) == timeMemory.get(Calendar.HOUR_OF_DAY);
@@ -75,18 +82,20 @@ public class WeatherController {
                 rainPerHour += weatherMeasurement.getRainfall();
             }else{
                 Map<Object,Object> rainFallMap = new HashMap<Object,Object>();
-                timeMemory.set(Calendar.MINUTE, 0);
-                timeMemory.set(Calendar.SECOND, 0);
-                rainFallMap.put("x", weatherMeasurement.getCreated().getTime());
+                rainFallMap.put("x", timeMemory.getTime());
                 rainFallMap.put("y", rainPerHour);
                 rainFallDataPoints.add(rainFallMap);
 
                 timeMemory.setTime(weatherMeasurement.getCreated());
+
+                timeMemory.set(Calendar.MINUTE, 0);
+                timeMemory.set(Calendar.SECOND, 0);
+
                 rainPerHour = 0;
             }
         }
         model.addAttribute("tempPointsList", tempsDataPoints);
-        model.addAttribute("humidityPointsList", humitityDataPoints);
+        model.addAttribute("humidityPointsList", humidityDataPoints);
         model.addAttribute("windSpeedsPointsList", windSpeedDataPoints);
         model.addAttribute("windGustSpeedsPointsList", windSpeedGustDataPoints);
         model.addAttribute("rainFallPointsList", rainFallDataPoints);
@@ -100,7 +109,7 @@ public class WeatherController {
         }
 
         WeatherMeasurementDao weather = new WeatherMeasurementDao(newestWeatherMeasurement);
-        weather.setRainfall(rain);
+        weather.setRainfall(round(rain, 2));
 
         model.addAttribute("weather", weather);
         return "today";
@@ -178,5 +187,13 @@ public class WeatherController {
         WeatherMeasurement weather = weatherMeasurementRepository.findById(Long.valueOf(id)).orElse(null);
         String json = gson.toJson(weather);
         return json;
+    }
+
+    public static double round(double value, int places) {
+        if (places < 0) throw new IllegalArgumentException();
+
+        BigDecimal bd = BigDecimal.valueOf(value);
+        bd = bd.setScale(places, RoundingMode.HALF_UP);
+        return bd.doubleValue();
     }
 }
