@@ -15,10 +15,14 @@
       var highs = [[${highDataPointsList}]];
       var lows = [[${lowDataPointsList}]];
       var rainFalls = [[${rainFallPointsList}]];
+      var windSpeeds = [[${windSpeedsPointsList}]];
+      var windGustSpeeds = [[${windGustSpeedsPointsList}]];
 
       highs.map(convertMillsToDate);
       lows.map(convertMillsToDate);
       rainFalls.map(convertMillsToDate);
+      windSpeeds.map(convertMillsToDate);
+      windGustSpeeds.map(convertMillsToDate);
 
       function convertMillsToDate(item) {
         item.x = new Date(item.x);
@@ -43,6 +47,17 @@
         toolTip: {
           shared: true,
           fontFamily: 'Montserrat',
+          contentFormatter: function ( e ) {
+            var content = " ";
+            content += addZero(e.entries[0].dataPoint.x.getDate()) + ";" + addZero(e.entries[0].dataPoint.x.getMonth() + 1 ) + ";"+ e.entries[0].dataPoint.x.getFullYear() + "</br>";
+            content += "<span style='color:#f54242;'>" + e.entries[0].dataSeries.name + ":</span> " + "<strong>" + parseFloat(e.entries[0].dataPoint.y).toFixed(1) + "</strong> °C";
+            content += "<br/>";
+            content += "<span style='color:#f54242;'>" + e.entries[1].dataSeries.name + ":</span> " + "<strong>" + parseFloat(e.entries[1].dataPoint.y).toFixed(1) + "</strong> °C";
+            content = content.split(".").join(",");
+            content = content.split(";").join(".");
+            content += "<br/>";
+            return content;
+          }
         },
         axisX:{
           intervalType: "day",
@@ -126,14 +141,79 @@
         }]
       });
 
+      var chartWindSpeed = new CanvasJS.Chart("windSpeed", {
+        animationEnabled: true,
+        theme: "light2",
+        exportEnabled: false,
+        title: {
+          text: "Maximale Windgeschwindigkeiten (Monat)",
+          fontFamily: 'Montserrat',
+          fontColor: "black"
+        },
+        toolTip: {
+          shared: true,
+          fontFamily: 'Montserrat',
+          contentFormatter: function ( e ) {
+            var content = " ";
+            content += addZero(e.entries[0].dataPoint.x.getDate()) + ";" + addZero(e.entries[0].dataPoint.x.getMonth() + 1 ) + ";"+ e.entries[0].dataPoint.x.getFullYear() + "</br>";
+            content += "<span style='color:#C24642;'>" + e.entries[1].dataSeries.name + ":</span> " + "<strong>" + parseFloat(e.entries[1].dataPoint.y).toFixed(2) + "</strong> km/h";
+            content += "<br/>";
+            content += "<span style='color:#6D78AD;'>" + e.entries[0].dataSeries.name + ":</span> " + "<strong>" + parseFloat(e.entries[0].dataPoint.y).toFixed(2) + "</strong> km/h";
+            content = content.split(".").join(",");
+            content = content.split(";").join(".");
+            content += "<br/>";
+
+            return content;
+          }
+        },
+        axisX: {
+          intervalType: "day",
+          valueFormatString: "DD.MM.YYYY"
+        },
+        axisY: [{
+          suffix: " km/h",
+          title: "Max. Windgeschwindigkeit (5 min.)",
+          includeZero: true
+        },
+          {
+            suffix: " km/h",
+            title: "Max. Böengeschwindigkeit (5 sec.)",
+            includeZero: true,
+            lineColor: "#C24642",
+            titleFontColor: "#C24642",
+            labelFontColor: "#C24642"
+          }],
+        data: [{
+          type: "line",
+          name: "Max; Windgeschwindigkeit (5 min;)",
+          xValueType: "dateTime",
+          xValueFormatString: "DD.MM.YYYY",
+          yValueType: "number",
+          yValueFormatString: "# km/h",
+          dataPoints: []
+        },{
+          type: "line",
+          name: "Max; Böengeschwindigkeit (5 sec;)",
+          color: "#C24642",
+          xValueType: "dateTime",
+          xValueFormatString: "DD.MM.YYYY",
+          yValueType: "number",
+          yValueFormatString: "# km/h",
+          dataPoints: []
+        }]
+      });
+
 
       /* Update dataPoints from AJAX and render the chart*/
       temps.options.data[0].dataPoints = lows;
       temps.options.data[1].dataPoints = highs;
       rainChart.options.data[0].dataPoints = rainFalls;
+      chartWindSpeed.options.data[0].dataPoints = windSpeeds;
+      chartWindSpeed.options.data[1].dataPoints = windGustSpeeds;
+
       temps.render();
       rainChart.render();
-
+      chartWindSpeed.render();
     }
 
   </script>
@@ -145,6 +225,7 @@
   </div>
   <div id="tempsContainer" style="height: 370px; width: 100%;"></div>
   <div id="rainFall" style="height: 370px; width: 100%;"></div>
+  <div id="windSpeed" style="height: 370px; width: 100%;"></div>
   <script src="https://canvasjs.com/assets/script/canvasjs.min.js"></script>
 
 

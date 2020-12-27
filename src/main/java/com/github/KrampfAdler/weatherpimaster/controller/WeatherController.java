@@ -145,10 +145,12 @@ public class WeatherController {
         List<Map<Object,Object>> highDataPoints1 = new ArrayList<Map<Object,Object>>();
         List<Map<Object,Object>> lowDataPoints1 = new ArrayList<Map<Object,Object>>();
         List<Map<Object,Object>> rainDataPoints1 = new ArrayList<Map<Object,Object>>();
+        List<Map<Object,Object>> windSpeedDataPoints = new ArrayList<Map<Object,Object>>();
+        List<Map<Object,Object>> windSpeedGustDataPoints = new ArrayList<Map<Object,Object>>();
 
 
         Instant now = Instant.now().plus(2, ChronoUnit.DAYS).truncatedTo(ChronoUnit.DAYS);
-        System.out.println("now: " + now);
+        //System.out.println("now: " + now);
         Instant nowMinusMonth = now.minus(31, ChronoUnit.DAYS);
 
         List<WeatherMeasurement> weatherMeasurements = weatherMeasurementRepository.findAllByCreatedBetween(Timestamp.from(nowMinusMonth), Timestamp.from(now));
@@ -161,7 +163,7 @@ public class WeatherController {
             WeatherMeasurement weatherMeasurement = iterator.next();
             if(weatherMeasurement.getCreated().toInstant().truncatedTo(ChronoUnit.DAYS).equals(lastDay) && iterator.hasNext()){
                 measurementsPerDay.add(weatherMeasurement);
-            }else{
+            }else if (measurementsPerDay.size() > 0){
                 //TODO: This doesn't work with timezones 2020-04-28 02:02:51.0 will be the next day because of summer time, fix later
                 Map<Object, Object> highMap = new HashMap<Object, Object>();
                 highMap.put("y", Collections.max(measurementsPerDay, new compTemps()).getAmbientTemperature());
@@ -169,6 +171,11 @@ public class WeatherController {
                 lowMap.put("y", Collections.min(measurementsPerDay, new compTemps()).getAmbientTemperature());
                 Map<Object, Object> rainMap = new HashMap<Object, Object>();
                 rainMap.put("y", measurementsPerDay.stream().mapToDouble(WeatherMeasurement::getRainfall).sum());
+                Map<Object,Object> windSpeedMap = new HashMap<Object,Object>();
+                windSpeedMap.put("y", Collections.max(measurementsPerDay, new compWindAvg()).getWindSpeed());
+                Map<Object,Object> windGustSpeedMap = new HashMap<Object,Object>();
+                windGustSpeedMap.put("y", Collections.max(measurementsPerDay, new compGusts()).getWindGustSpeed());
+
 
                 ZonedDateTime zdt = ZonedDateTime.ofInstant(lastDay, ZoneId.systemDefault());
                 Calendar calendar = GregorianCalendar.from(zdt);
@@ -176,14 +183,21 @@ public class WeatherController {
                 highMap.put("x", calendar.getTime().getTime());
                 lowMap.put("x", calendar.getTime().getTime());
                 rainMap.put("x", calendar.getTime().getTime());
+                windSpeedMap.put("x", calendar.getTime().getTime());
+                windGustSpeedMap.put("x", calendar.getTime().getTime());
 
                 highDataPoints1.add(highMap);
                 lowDataPoints1.add(lowMap);
                 rainDataPoints1.add(rainMap);
+                windSpeedDataPoints.add(windSpeedMap);
+                windSpeedGustDataPoints.add(windGustSpeedMap);
 
                 measurementsPerDay = new ArrayList<>();
                 lastDay = weatherMeasurement.getCreated().toInstant().truncatedTo(ChronoUnit.DAYS);
                 measurementsPerDay.add(weatherMeasurement);
+            }else {
+                //Fallback in case that a day has no measurements
+                lastDay = lastDay.plus(1, ChronoUnit.DAYS);
             }
         }
 
@@ -193,10 +207,12 @@ public class WeatherController {
         model.addAttribute("highDataPointsList", highDataPoints1);
         model.addAttribute("lowDataPointsList", lowDataPoints1);
         model.addAttribute("rainFallPointsList", rainDataPoints1);
+        model.addAttribute("windSpeedsPointsList", windSpeedDataPoints);
+        model.addAttribute("windGustSpeedsPointsList", windSpeedGustDataPoints);
         return "month";
     }
 
-    public class compTemps implements Comparator<WeatherMeasurement> {
+    public static class compTemps implements Comparator<WeatherMeasurement> {
         public int compare(WeatherMeasurement a, WeatherMeasurement b) {
             if (a.getAmbientTemperature() > b.getAmbientTemperature())
                 return -1; // highest value first
@@ -206,12 +222,23 @@ public class WeatherController {
         }
     }
 
+    public static class compGusts implements Comparator<WeatherMeasurement> {
+        public int compare(WeatherMeasurement a, WeatherMeasurement b) {
+            return Double.compare(a.getWindGustSpeed(), b.getWindGustSpeed()); // highest value first
+        }
+    }
+
+    public static class compWindAvg implements Comparator<WeatherMeasurement> {
+        public int compare(WeatherMeasurement a, WeatherMeasurement b) {
+            return Double.compare(a.getWindSpeed(), b   .getWindSpeed()); // highest value first
+        }
+    }
+
     @GetMapping(path = "/api/{id}", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public String getWeathers(@PathVariable String id) {
         Gson gson = new Gson();
         WeatherMeasurement weather = weatherMeasurementRepository.findById(Long.valueOf(id)).orElse(null);
-        String json = gson.toJson(weather);
-        return json;
+        return gson.toJson(weather);
     }
 
     public static double round(double value, int places) {
